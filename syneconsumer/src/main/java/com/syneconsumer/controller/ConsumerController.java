@@ -3,6 +3,8 @@ package com.syneconsumer.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,10 +22,21 @@ import com.syneconsumer.dto.Employee;
 public class ConsumerController {
 	// @Autowired
 	// RestTemplate restTemplate;
+	
+	@Autowired
+	private DiscoveryClient dClient;
+	
 	@GetMapping("/displayallproducer")
 	public List<Employee> getAll() {
+		
+		List<ServiceInstance> ll=   dClient.getInstances("SYNEPRODUCER");
+		ServiceInstance firstinstance=ll.get(0);
+		
+		String url=firstinstance.getUri().toString();
+		System.out.println(url);
+		
 		RestTemplate restTemplate = new RestTemplate();
-		List<Employee> ee = restTemplate.getForObject("http://localhost:10001/api/displayall", List.class);
+		List<Employee> ee = restTemplate.getForObject(url+"/api/displayall", List.class);
 		System.out.println(ee);
 		return ee;
 	}
